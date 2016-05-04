@@ -1,0 +1,37 @@
+
+PARSER_BEGIN(SyntaxChecker)
+
+package com.example;
+
+import java.io.InputStream;
+
+public class SyntaxChecker {
+    public static boolean parse(InputStream reader) {
+        try {
+            new SyntaxChecker(reader).S();
+            return true;
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+}
+
+PARSER_END(SyntaxChecker)
+
+// Grammar:
+//
+// SKIP  → [\x0d\x0a\x20\x09]
+// NUM   → [0-9]+
+// TOKEN → [+*()] | NUM
+//
+// E → T ("+" T)*
+// T → F ("*" F)*
+// F → NUM | "(" E ")"
+
+SKIP:  { " " | "\t" | "\n" | "\r" }
+TOKEN: { "(" | ")" | "+" | "*" | <NUM: (["0"-"9"])+ > }
+
+void S(): {} { E() <EOF>           }
+void E(): {} { T() ("+" T())*      }
+void T(): {} { F() ("*" F())*      }
+void F(): {} { <NUM> | "(" E() ")" }
